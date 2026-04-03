@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>FastAPI Auth UI</title>
+
+<style>
+
+body {
+font-family: Arial;
+background: #121921;
+color: white;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+}
+
+.container {
+background: #1c2530;
+padding: 40px;
+border-radius: 12px;
+width: 320px;
+text-align: center;
+}
+
+input {
+width: 100%;
+padding: 10px;
+margin: 10px 0;
+border-radius: 6px;
+border: none;
+}
+
+button {
+width: 100%;
+padding: 10px;
+background: #00adb5;
+color: white;
+border: none;
+border-radius: 6px;
+cursor: pointer;
+}
+
+button:hover {
+background: #009aa0;
+}
+
+.link {
+cursor: pointer;
+color: #00adb5;
+margin-top: 10px;
+display: block;
+}
+
+.hidden {
+display: none;
+}
+
+.token {
+font-size: 11px;
+margin-top: 10px;
+word-break: break-all;
+}
+
+</style>
+</head>
+
+
+<body>
+
+<div class="container">
+
+<!-- REGISTER FORM -->
+
+<div id="registerForm">
+
+<h2>Register</h2>
+
+<input id="reg_email" placeholder="Email">
+
+<input id="reg_password"
+type="password"
+placeholder="Password">
+
+<button onclick="register()">Register</button>
+
+<span class="link"
+onclick="showLogin()">
+Already have account? Login
+</span>
+
+</div>
+
+
+<!-- LOGIN FORM -->
+
+<div id="loginForm"
+class="hidden">
+
+<h2>Login</h2>
+
+<input id="login_email"
+placeholder="Email">
+
+<input id="login_password"
+type="password"
+placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<span class="link"
+onclick="showRegister()">
+Create account
+</span>
+
+</div>
+
+
+<!-- DASHBOARD -->
+
+<div id="dashboard"
+class="hidden">
+
+<h2>Dashboard ✅</h2>
+
+<p>You are logged in successfully</p>
+
+<div id="tokenBox"
+class="token"></div>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+const API = "http://10.253.16.230:8000";
+
+
+// SWITCH UI
+
+function showLogin() {
+
+document.getElementById("registerForm").classList.add("hidden");
+document.getElementById("loginForm").classList.remove("hidden");
+
+}
+
+function showRegister() {
+
+document.getElementById("loginForm").classList.add("hidden");
+document.getElementById("registerForm").classList.remove("hidden");
+
+}
+
+
+// REGISTER USER
+
+async function register() {
+
+let email =
+document.getElementById("reg_email").value;
+
+let password =
+document.getElementById("reg_password").value;
+
+
+let response = await fetch(
+`${API}/register`,
+{
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+email,
+password
+})
+
+});
+
+
+if(response.ok)
+alert("Registered successfully 🎉");
+
+else
+alert("Registration failed ❌");
+
+}
+
+
+// LOGIN USER
+
+async function login() {
+
+let email =
+document.getElementById("login_email").value;
+
+let password =
+document.getElementById("login_password").value;
+
+
+let response = await fetch(
+`${API}/login`,
+{
+method: "POST",
+
+headers: {
+"Content-Type": "application/json"
+},
+
+body: JSON.stringify({
+email,
+password
+})
+
+});
+
+
+if(response.ok){
+
+let data = await response.json();
+
+localStorage.setItem(
+"token",
+data.access_token
+);
+
+
+showDashboard();
+
+}
+
+else{
+
+alert("Login failed ❌");
+
+}
+
+}
+
+
+// SHOW DASHBOARD
+
+function showDashboard(){
+
+document.getElementById("loginForm").classList.add("hidden");
+
+document.getElementById("dashboard").classList.remove("hidden");
+
+
+document.getElementById("tokenBox").innerText =
+localStorage.getItem("token");
+
+}
+
+
+// LOGOUT
+
+function logout(){
+
+localStorage.removeItem("token");
+
+location.reload();
+
+}
+
+
+// AUTO LOGIN IF TOKEN EXISTS
+
+if(localStorage.getItem("token")){
+
+showDashboard();
+
+}
+
+</script>
+
+
+</body>
+</html>
